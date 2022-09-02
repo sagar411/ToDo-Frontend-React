@@ -10,6 +10,8 @@ import { useNavigate } from 'react-router-dom';
 import { register,reset } from '../../features/Authentication/userSlice';
 
 export const Register = () => {
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [toastMessage, setToastMessage] = useState("");
     const [registerData, setRegisterData] = useState({
         name:"",
         email :"",
@@ -18,17 +20,23 @@ export const Register = () => {
         });
 
        
-
+        const {name, email, password, confirmedPassword} = registerData;
         const dispatch = useDispatch();
         const navigate = useNavigate();
         const {user,isError , isSuccess, message} = useSelector((state)=>state.user);
 
         useEffect(()=>{
+            if (isError) {
+                setOpenSnackbar(true);
+                setToastMessage(message);
+              }
             if(isSuccess||user){
                 navigate("/");
             }
+            dispatch(reset())
 
         },[user,isError,isSuccess,message,navigate,dispatch])
+
         const handleChange=(e)=>{
             setRegisterData((prevState)=>({
                 ...prevState,
@@ -50,10 +58,21 @@ export const Register = () => {
 
                 };
                 dispatch(register(userData));
+
             }
         }
+        const handleClose = () => {
+            setOpenSnackbar(false);
+          };
+          const action = (
+            <>
+              <IconButton onClick={handleClose}>
+                <CloseIcon fontSize='small' />
+              </IconButton>
+            </>
+          );
         
-        const {name, email, password, confirmedPassword} = registerData;
+       
 
       
   return( <>
@@ -135,6 +154,17 @@ export const Register = () => {
     
 
   </StyledContainer>
+  <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        message={toastMessage}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        action={action}
+      />
   </>
   )
 }
